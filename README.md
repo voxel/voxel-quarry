@@ -1,0 +1,6 @@
+# voxel-quarry
+
+## License
+
+MIT
+
