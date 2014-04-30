@@ -4,7 +4,7 @@ module.exports = function(game, opts) {
   return new QuarryPlugin(game, opts);
 };
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-registry', 'voxel-blockdata', 'voxel-harvest']
+  loadAfter: ['voxel-registry', 'voxel-blockdata', 'voxel-harvest', 'voxel-carry']
 };
 
 function QuarryPlugin(game, opts) {
@@ -18,6 +18,9 @@ function QuarryPlugin(game, opts) {
 
   this.harvest = game.plugins.get('voxel-harvest');
   if (!this.harvest) throw new Error('voxel-quarry requires "voxel-harvest" plugin');
+
+  this.carry = game.plugins.get('voxel-carry');
+  if (!this.carry) throw new Error('voxel-quarry requires "voxel-carry" plugin');
 
   this.rangeX = opts.rangeX || 16;
   this.rangeY = opts.rangeY || 16;
@@ -74,18 +77,35 @@ QuarryPlugin.prototype.startMining = function(x, y, z) {
 QuarryPlugin.prototype.mine = function(x, y, z, bd) {
   // TODO: confirm quarry block still exists and is active
 
-  var nextTarget = this.progressToCoords(bd.progress, x, y, z);
-  console.log('quarrying',nextTarget.join(','));
+  var target = this.progressToCoords(bd.progress, x, y, z);
+  console.log('quarrying',target.join(','));
 
-  this.game.setBlock(nextTarget, 0);
+  // get the item drop
+  var blockIndex = this.game.getBlock(target);
+  var blockName = this.registry.getBlockName(blockIndex);
+  var itemPile = this.harvest.block2ItemPile(blockName);
 
-  bd.progress += 1;
-  if (bd.progress >= 0xfff) {
-    console.log('quarry completed ',x,y,z);
+  // destroy the block
+  if (this.game.setBlock(target, 0) === false) {
+    // if we failed to mine it.. TODO: actually, setBlock() (at least as of voxel-engine 0.20.1)
+    // has no return value (or 'undefined'), so this clause is never executed. For later. (permissions?)
+    return;
+  }
+
+  // give the player the mined items TODO: adjacent voxel-chest integration, or an item transport system?
+  var excess = this.carry.inventory.give(itemPile);
+  if (excess > 0) {
+    // full so cannot mine any more TODO: just drop items?
     return;
   }
 
   // schedule next mining operation
+  bd.progress += 1;
+  if (bd.progress >= 0xfff) {
+    console.log('quarry completed ',x,y,z);
+    // TODO: play a sound with voxel-sfx?
+    return;
+  }
   window.setTimeout(this.mine.bind(this, x, y, z, bd), this.mineDelayMs); // TODO: use tic module, or main game loop instead?
 };
 
