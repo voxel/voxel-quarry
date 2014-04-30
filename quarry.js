@@ -4,7 +4,7 @@ module.exports = function(game, opts) {
   return new QuarryPlugin(game, opts);
 };
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-registry', 'voxel-blockdata']
+  loadAfter: ['voxel-registry', 'voxel-blockdata', 'voxel-harvest']
 };
 
 function QuarryPlugin(game, opts) {
@@ -15,6 +15,9 @@ function QuarryPlugin(game, opts) {
 
   this.blockdata = game.plugins.get('voxel-blockdata');
   if (!this.blockdata) throw new Error('voxel-quarry requires "voxel-blockdata" plugin');
+
+  this.harvest = game.plugins.get('voxel-harvest');
+  if (!this.harvest) throw new Error('voxel-quarry requires "voxel-harvest" plugin');
 
   this.rangeX = opts.rangeX || 16;
   this.rangeY = opts.rangeY || 16;
@@ -57,7 +60,7 @@ QuarryPlugin.prototype.progressToCoords = function(progress, sx, sy, sz) {
 
 // start with (x,y,z) = position of quarry block
 QuarryPlugin.prototype.startMining = function(x, y, z) {
-  // stored blockdata
+  // initialize stored blockdata
   var bd = this.blockdata.get(x, y, z);
   if (!bd) {
     bd = {progress: 0};
@@ -67,14 +70,22 @@ QuarryPlugin.prototype.startMining = function(x, y, z) {
   this.mine(x, y, z, bd);
 };
 
+// do one block-mining operation
 QuarryPlugin.prototype.mine = function(x, y, z, bd) {
+  // TODO: confirm quarry block still exists and is active
+
   var nextTarget = this.progressToCoords(bd.progress, x, y, z);
   console.log('quarrying',nextTarget.join(','));
 
   this.game.setBlock(nextTarget, 0);
 
   bd.progress += 1;
+  if (bd.progress >= 0xfff) {
+    console.log('quarry completed ',x,y,z);
+    return;
+  }
 
+  // schedule next mining operation
   window.setTimeout(this.mine.bind(this, x, y, z, bd), this.mineDelayMs); // TODO: use tic module, or main game loop instead?
 };
 
