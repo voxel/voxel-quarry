@@ -18,7 +18,8 @@ up to a 16x16x16 cubic volume:
 ![screenshot](http://i.imgur.com/kzkMuv4.png "Screenshot")
 
 As they are mined, the item drops will be added to the player inventory
-with [voxel-carry](https://github.com/deathcap/voxel-carry). Also requires
+with [voxel-carry](https://github.com/deathcap/voxel-carry), if installed.
+Also requires
 [voxel-harvest](https://github.com/deathcap/voxel-harvest) (to calculate
 the item drops from the mined blocks),
 [voxel-blockdata](https://github.com/deathcap/voxel-blockdata) (for storing

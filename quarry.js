@@ -19,8 +19,7 @@ function QuarryPlugin(game, opts) {
   this.harvest = game.plugins.get('voxel-harvest');
   if (!this.harvest) throw new Error('voxel-quarry requires "voxel-harvest" plugin');
 
-  this.carry = game.plugins.get('voxel-carry');
-  if (!this.carry) throw new Error('voxel-quarry requires "voxel-carry" plugin');
+  this.carry = game.plugins.get('voxel-carry'); // optional
 
   this.rangeX = opts.rangeX || 16;
   this.rangeY = opts.rangeY || 16;
@@ -92,12 +91,14 @@ QuarryPlugin.prototype.mine = function(x, y, z, bd) {
     return;
   }
 
-  // give the player the mined items TODO: adjacent voxel-chest integration, or an item transport system?
-  var excess = this.carry.inventory.give(itemPile);
-  if (excess > 0) {
-    // full so cannot mine any more TODO: just drop items?
-    return;
-  }
+  if (this.quarry) {
+    // give the player the mined items TODO: adjacent voxel-chest integration, or an item transport system?
+    var excess = this.carry.inventory.give(itemPile);
+    if (excess > 0) {
+      // full so cannot mine any more TODO: just drop items?
+      return;
+    }
+  } // otherwise, just destroy the items
 
   // schedule next mining operation
   bd.progress += 1;
