@@ -15,8 +15,10 @@ function QuarryPlugin(game, opts) {
 }
 
 QuarryPlugin.prototype.enable = function() {
+  this.registry.registerBlock('quarry', {texture: 'furnace_top'/* TODO */});
 };
 
 QuarryPlugin.prototype.disable = function() {
+  // TODO: unregister block
 };
 
