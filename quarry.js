@@ -4,17 +4,23 @@ module.exports = function(game, opts) {
   return new QuarryPlugin(game, opts);
 };
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-registry']
+  loadAfter: ['voxel-registry', 'voxel-blockdata']
 };
 
 function QuarryPlugin(game, opts) {
   this.game = game;
+
   this.registry = game.plugins.get('voxel-registry');
-  if (!this.registry) throw new Error('voxel-quarry requires voxel-registry plugin');
+  if (!this.registry) throw new Error('voxel-quarry requires "voxel-registry" plugin');
+
+  this.blockdata = game.plugins.get('voxel-blockdata');
+  if (!this.blockdata) throw new Error('voxel-quarry requires "voxel-blockdata" plugin');
 
   this.rangeX = opts.rangeX || 16;
   this.rangeY = opts.rangeY || 16;
   this.rangeZ = opts.rangeZ || 16;
+
+  this.mineDelayMs = opts.mineDelayMs || 200;
 
   this.enable();
 }
@@ -34,15 +40,41 @@ QuarryPlugin.prototype.interact = function(target) {
   this.startMining(target.voxel[0], target.voxel[1], target.voxel[2]);
 };
 
+QuarryPlugin.prototype.progressToCoords = function(progress, sx, sy, sz) {
+  // unpack XZY TODO: support arbitrary ranges (besides rangeX/Y/Z 16)
+  var x = (progress >> 0) & 0xf;
+  var z = (progress >> 4) & 0xf;
+  var y = (progress >> 8) & 0xf;
+
+  x = sx - x;
+  y = sy - y;
+  z = sz - z;
+
+  y -= 1; // always mine directly below quarry
+
+  return [x, y, z];
+};
+
 // start with (x,y,z) = position of quarry block
 QuarryPlugin.prototype.startMining = function(x, y, z) {
-  y -= 1; // mine directly below quarry
-
-  for (var i = 0; i < this.rangeX; i += 1) {
-    for (var j = 0; j < this.rangeY; j += 1) {
-      for (var k = 0; k < this.rangeZ; k += 1) {
-        this.game.setBlock([x-k, y-j, z-i], 0);
-      }
-    }
+  // stored blockdata
+  var bd = this.blockdata.get(x, y, z);
+  if (!bd) {
+    bd = {progress: 0};
+    this.blockdata.set(x, y, z, bd);
   }
+
+  this.mine(x, y, z, bd);
 };
+
+QuarryPlugin.prototype.mine = function(x, y, z, bd) {
+  var nextTarget = this.progressToCoords(bd.progress, x, y, z);
+  console.log('quarrying',nextTarget.join(','));
+
+  this.game.setBlock(nextTarget, 0);
+
+  bd.progress += 1;
+
+  window.setTimeout(this.mine.bind(this, x, y, z, bd), this.mineDelayMs); // TODO: use tic module, or main game loop instead?
+};
+
