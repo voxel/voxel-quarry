@@ -1,7 +1,7 @@
 {
   "name": "voxel-quarry",
   "description": "automated mining quarry (voxel.js plugin)",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "quarry.js",
   "repository": {
     "type": "git",
@@ -10,7 +10,6 @@
   "keywords": [
     "voxel"
   ],
-  "dependencies": {
-  },
+  "dependencies": {},
   "license": "MIT"
 }
