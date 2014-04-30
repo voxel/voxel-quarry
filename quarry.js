@@ -4,7 +4,7 @@ module.exports = function(game, opts) {
   return new QuarryPlugin(game, opts);
 };
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-registry', 'voxel-blockdata', 'voxel-harvest', 'voxel-carry']
+  loadAfter: ['voxel-registry', 'voxel-blockdata', 'voxel-harvest', 'voxel-carry', 'voxel-recipes']
 };
 
 function QuarryPlugin(game, opts) {
@@ -20,6 +20,9 @@ function QuarryPlugin(game, opts) {
   if (!this.harvest) throw new Error('voxel-quarry requires "voxel-harvest" plugin');
 
   this.carry = game.plugins.get('voxel-carry'); // optional
+  this.recipes = game.plugins.get('voxel-recipes'); // optional
+
+  this.registerRecipe = opts.registerRecipe !== undefined ? opts.registerRecipe : true;
 
   this.rangeX = opts.rangeX || 16;
   this.rangeY = opts.rangeY || 16;
@@ -35,10 +38,19 @@ QuarryPlugin.prototype.enable = function() {
     texture: 'furnace_top'/* TODO */,
     onInteract: QuarryPlugin.prototype.interact.bind(this) // TODO: better way to activate, power?
   });
+
+  if (this.recipes && this.registerRecipe) {
+    this.recipes.registerPositional([
+        ['ingotIron', 'ingotIron', 'ingotIron'],
+        ['ingotIron', 'pickaxeIron', 'ingotIron'], // TODO: require pickaxe damage tag to be 0! (or missing)
+        ['ingotIron', 'ingotIron', 'ingotIron'],
+      ], ['quarry']);
+  }
 };
 
 QuarryPlugin.prototype.disable = function() {
   // TODO: unregister block
+  // TODO: unregister recipe
 };
 
 QuarryPlugin.prototype.interact = function(target) {
@@ -90,6 +102,7 @@ QuarryPlugin.prototype.mine = function(x, y, z, bd) {
     // has no return value (or 'undefined'), so this clause is never executed. For later. (permissions?)
     return;
   }
+  // TODO: voxel-sfx block mining sound. maybe in voxel-harvest (per block type)
 
   if (this.quarry) {
     // give the player the mined items TODO: adjacent voxel-chest integration, or an item transport system?
@@ -105,6 +118,7 @@ QuarryPlugin.prototype.mine = function(x, y, z, bd) {
   if (bd.progress >= 0xfff) {
     console.log('quarry completed ',x,y,z);
     // TODO: play a sound with voxel-sfx?
+    // TODO: destroy the quarry itself? single-use?
     return;
   }
   window.setTimeout(this.mine.bind(this, x, y, z, bd), this.mineDelayMs); // TODO: use tic module, or main game loop instead?

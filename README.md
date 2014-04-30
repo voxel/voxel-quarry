@@ -8,8 +8,11 @@ Load with [voxel-plugins](https://github.com/deathcap/voxel-plugins), options:
 
 * `mineDelayMs`: delay between each block mining operation (default 200 ms)
 
-To use in the game,
-acquire the quarry block (for example, with
+To use in the game, craft a quarry block with a
+[voxel-workbench](https://github.com/deathcap/voxel-workbench) by
+surrounding an iron
+[voxel-pickaxe](https://github.com/deathcap/voxel-pickaxe) with iron
+ingots (or with
 [voxel-commands](https://github.com/deathcap/voxel-commands) installed,
 type ".item quarry"), place it in the world, then right-click it to begin
 the process. One at a time, the blocks below the quarry will be mined,
