@@ -1,6 +1,6 @@
 {
   "name": "voxel-quarry",
-  "description": "",
+  "description": "automated mining quarry (voxel.js plugin)",
   "version": "0.0.1",
   "main": "quarry.js",
   "repository": {
