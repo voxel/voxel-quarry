@@ -27,7 +27,7 @@ Also requires
 the item drops from the mined blocks),
 [voxel-blockdata](https://github.com/deathcap/voxel-blockdata) (for storing
 the mining progress for the quarry), and
-[voxel-registry](https://github.com/deathcap/voxel-registry) pluginsarea.
+[voxel-registry](https://github.com/deathcap/voxel-registry) plugins.
 
 ## References / see also
 
