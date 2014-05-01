@@ -81,12 +81,15 @@ QuarryPlugin.prototype.startMining = function(x, y, z) {
     this.blockdata.set(x, y, z, bd);
   }
 
-  this.mine(x, y, z, bd);
+  this.mine(x, y, z);
 };
 
 // do one block-mining operation
-QuarryPlugin.prototype.mine = function(x, y, z, bd) {
-  // TODO: confirm quarry block still exists and is active
+QuarryPlugin.prototype.mine = function(x, y, z) {
+  // get the blockdata instance, confirm it still exists (not destroyed)
+  var bd = this.blockdata.get(x, y, z);
+  if (!bd) return;  // quarry block destroyed
+
 
   var target = this.progressToCoords(bd.progress, x, y, z);
   console.log('quarrying',target.join(','));
@@ -121,6 +124,6 @@ QuarryPlugin.prototype.mine = function(x, y, z, bd) {
     // TODO: destroy the quarry itself? single-use?
     return;
   }
-  window.setTimeout(this.mine.bind(this, x, y, z, bd), this.mineDelayMs); // TODO: use tic module, or main game loop instead?
+  window.setTimeout(this.mine.bind(this, x, y, z), this.mineDelayMs); // TODO: use tic module, or main game loop instead?
 };
 
