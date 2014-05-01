@@ -76,6 +76,9 @@ QuarryPlugin.prototype.progressToCoords = function(progress, sx, sy, sz) {
 QuarryPlugin.prototype.startMining = function(x, y, z) {
   // initialize stored blockdata
   var bd = this.blockdata.get(x, y, z);
+
+  if (bd) return; // don't start mining more than once TODO: refactor
+
   if (!bd) {
     bd = {progress: 0};
     this.blockdata.set(x, y, z, bd);
